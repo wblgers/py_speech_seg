@@ -8,4 +8,4 @@ Run script multi_detect.py to test the segmentation on a simple dialog.
 
 And you can get a speech segmentation result as showm below:
 
-![Alt text](https://github.com/wblgers/py_speech_seg/raw/master/Screenshots/Demo1.png)
+![Alt text](https://github.com/wblgers/py_speech_seg/raw/master/pictures/Demo1.png)
