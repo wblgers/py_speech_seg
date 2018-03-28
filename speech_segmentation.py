@@ -2,6 +2,8 @@ import numpy as np
 import voice_activity_detect as vad
 import librosa
 import matplotlib.pyplot as plt
+import os
+import shutil
 
 
 #Speech segmentation based on BIC
@@ -65,7 +67,7 @@ def speech_segmentation(mfccs):
 
     return np.array(store_cp)
 
-def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False):
+def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg = False):
     y, sr = librosa.load(file, sr=sr)
 
     mfccs = librosa.feature.mfcc(y, sr, n_mfcc=12, hop_length=frame_shift, n_fft=frame_size)
@@ -98,4 +100,18 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False):
         plt.ylabel("Speech Amp")
         plt.grid(True)
         plt.show()
+
+    if save_seg:
+        if not os.path.exists("save_audio"):
+            os.makedirs("save_audio")
+        else:
+            shutil.rmtree("save_audio")
+            os.makedirs("save_audio")
+        save_segpoint = output_segpoint.copy()
+        # Add the start and the end of the audio file
+        save_segpoint.insert(0,0)
+        save_segpoint.append(len(y))
+        for i in range(len(save_segpoint)-1):
+            tempAudio = y[save_segpoint[i]:save_segpoint[i+1]]
+            librosa.output.write_wav("save_audio/%s.wav"%i,tempAudio,sr)
     return (np.asarray(output_segpoint) / float(sr))
