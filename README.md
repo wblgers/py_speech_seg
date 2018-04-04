@@ -22,6 +22,7 @@ To install librosa, you can try the following command:
    And you can get a speech segmentation result as showm below:
 
 ![Alt text](https://github.com/wblgers/py_speech_seg/raw/master/pictures/Demo1.png)
+
 2. In the python script of multi_detect.py, there is a function call after some parameter settings:
     
     `seg_point = seg.multi_segmentation("dialog4.wav",sr,frame_size,frame_shift,plot_seg=False,save_seg=True)`
