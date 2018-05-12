@@ -1,15 +1,16 @@
 import numpy as np
 import voice_activity_detect as vad
+import vq_lbg as vqlbg
 import librosa
 import matplotlib.pyplot as plt
 import os
 import shutil
+from sklearn.cluster import KMeans
 
 
 #Speech segmentation based on BIC
 def compute_bic(mfcc_v,delta):
     m, n = mfcc_v.shape
-    # print(m, n)
 
     sigma0 = np.cov(mfcc_v).diagonal()
     eps = np.spacing(1)
@@ -67,7 +68,7 @@ def speech_segmentation(mfccs):
 
     return np.array(store_cp)
 
-def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg = False):
+def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg = False,classify_seg = False):
     y, sr = librosa.load(file, sr=sr)
 
     mfccs = librosa.feature.mfcc(y, sr, n_mfcc=12, hop_length=frame_shift, n_fft=frame_size)
@@ -114,4 +115,41 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
         for i in range(len(save_segpoint)-1):
             tempAudio = y[save_segpoint[i]:save_segpoint[i+1]]
             librosa.output.write_wav("save_audio/%s.wav"%i,tempAudio,sr)
+
+    if classify_seg:
+        classify_segpoint = output_segpoint.copy()
+        # Add the start and the end of the audio file
+        classify_segpoint.insert(0, 0)
+        classify_segpoint.append(len(y))
+
+        # Length of codebook
+        k = 16
+        vq_features = np.zeros((len(classify_segpoint) - 1,k*12),dtype=np.float32)
+        for i in range(len(classify_segpoint) - 1):
+            tempAudio = y[classify_segpoint[i]:classify_segpoint[i + 1]]
+            mfccs = librosa.feature.mfcc(tempAudio, sr, n_mfcc=12, hop_length=frame_shift, n_fft=frame_size)
+            mfccs = mfccs / mfccs.max()
+            vq_code = vqlbg.vqlbg(mfccs,k)
+            vq_features[i,:] = vq_code.reshape(1,vq_code.shape[0]*vq_code.shape[1])
+
+        K = range(1,len(classify_segpoint))
+        square_error = []
+        for k in K:
+            kmeans = KMeans(n_clusters=k, random_state=0).fit(vq_features)
+            square_error.append(kmeans.inertia_)
+
+        plt.figure('Kmeans Number of clusters evaluate')
+        plt.plot(K, square_error, "bo-")
+        plt.title('Please choose the best K value for the number of clusters under Elbow Criterion')
+        plt.xlabel("Number of clusters")
+        plt.ylabel("SSE For each step")
+        plt.ylim(0,square_error[0]*1.5)
+        plt.grid(True)
+        plt.show()
+
+        k_n = input("Please input the best K value: ")
+        kmeans = KMeans(int(k_n), random_state=0).fit(vq_features)
+        print("The lables for",len(kmeans.labels_),"speech segmentation belongs to the clusters below:")
+        for i in range(len(kmeans.labels_)):
+            print(kmeans.labels_[i],"")
     return (np.asarray(output_segpoint) / float(sr))
