@@ -51,6 +51,10 @@ To install librosa, you can try the following command:
 
    From the audio files stored in folder "save_audio", we can check that the clustering result is right.
    
+## My Blog for this project
+[Python实现基于BIC的语音对话分割(一)](https://blog.csdn.net/wblgers1234/article/details/75896605)
+
+[Python实现基于BIC的语音对话分割(二)](https://blog.csdn.net/wblgers1234/article/details/77103444)
 
 ## Reference
 *Speaker, Environment and Channel Change Detection and Clustering via the Bayesian Information Criterion*, by IBM T.J. Watson Research Center
