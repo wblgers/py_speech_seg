@@ -140,7 +140,7 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
 
         plt.figure('Kmeans Number of clusters evaluate')
         plt.plot(K, square_error, "bo-")
-        plt.title('Please choose the best K value for the number of clusters under Elbow Criterion')
+        plt.title('Please choose the best number of clusters under Elbow Criterion')
         plt.xlabel("Number of clusters")
         plt.ylabel("SSE For each step")
         plt.ylim(0,square_error[0]*1.5)

@@ -31,6 +31,26 @@ To install librosa, you can try the following command:
 
    To plot out the wave figure in time domain with segmentation lines on, set the flag `plot_seg=True`
 
+3. Add a new parameter interface to enable the "Clustering segmented audio fragment using Kmeans method", just set the flag:
+    `classify_seg=True`
+   
+   To determine the number of cluster number, I plot out a figure with X axis the number of clusters, Y axis is the "Sum of squared distances of samples to their closest cluster center" for each Kmeans clustering. Choose the best K value under Elbow Criterion:
+
+![Alt text](https://github.com/wblgers/py_speech_seg/raw/master/pictures/kmeans_number_of_clusters_evaluate.png)
+
+   From the figure shown abvove, I choose K = 2 to be the best cluster numbers:
+   
+   Please input the best K value: 2
+
+   The lables for 4 speech segmentation belongs to the clusters below:
+
+   0 
+   1 
+   0 
+   1 
+
+   From the audio files stored in folder "save_audio", we can check that the clustering result is right.
+   
 
 ## Reference
 *Speaker, Environment and Channel Change Detection and Clustering via the Bayesian Information Criterion*, by IBM T.J. Watson Research Center
