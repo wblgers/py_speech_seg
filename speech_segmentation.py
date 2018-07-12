@@ -82,6 +82,11 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
     output_segpoint = []
     for i in rangeLoop:
         temp = y[seg_point[i]:seg_point[i + 1]]
+        # add a detection of silence before vad
+        max_mean = np.mean(temp[temp.argsort()[-800:]])
+        if max_mean < 0.005:
+            continue
+        # vad detect
         x1, x2 = vad.vad(temp, sr=sr, framelen=frame_size, frameshift=frame_shift)
         if len(x1) == 0 or len(x2) == 0:
             continue
@@ -123,14 +128,17 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
         classify_segpoint.append(len(y))
 
         # Length of codebook
-        k = 16
-        vq_features = np.zeros((len(classify_segpoint) - 1,k*12),dtype=np.float32)
+        # k = 16
+        # vq_features = np.zeros((len(classify_segpoint) - 1,k*12),dtype=np.float32)
+        vq_features = np.zeros((len(classify_segpoint) - 1, 12), dtype=np.float32)
         for i in range(len(classify_segpoint) - 1):
             tempAudio = y[classify_segpoint[i]:classify_segpoint[i + 1]]
             mfccs = librosa.feature.mfcc(tempAudio, sr, n_mfcc=12, hop_length=frame_shift, n_fft=frame_size)
             mfccs = mfccs / mfccs.max()
-            vq_code = vqlbg.vqlbg(mfccs,k)
-            vq_features[i,:] = vq_code.reshape(1,vq_code.shape[0]*vq_code.shape[1])
+            vq_code = np.mean(mfccs, axis=1)
+            vq_features[i, :] = vq_code.reshape(1, vq_code.shape[0])
+            # vq_code = vqlbg.vqlbg(mfccs,k)
+            # vq_features[i,:] = vq_code.reshape(1,vq_code.shape[0]*vq_code.shape[1])
 
         K = range(1,len(classify_segpoint))
         square_error = []
