@@ -6,9 +6,55 @@ import matplotlib.pyplot as plt
 import os
 import shutil
 from sklearn.cluster import KMeans
+from collections import OrderedDict
 
 
-#Speech segmentation based on BIC
+
+def cluster_greedy(feature_vectors, cluster_list):
+    current_cluster_number = len(cluster_list)
+    for index, key in enumerate(feature_vectors.keys()):
+        if index == 0:
+            base_feature = feature_vectors[key]
+            cluster_list[str(current_cluster_number)]=list()
+            temp = cluster_list[str(current_cluster_number)]
+            temp.append(key)
+            cluster_list[str(current_cluster_number)] = temp
+        else:
+            bic_dis = cluter_on_bic(base_feature, feature_vectors[key])
+            if bic_dis < 50:
+                temp = cluster_list[str(current_cluster_number)]
+                temp.append(key)
+                cluster_list[str(current_cluster_number)] = temp
+
+    for i in cluster_list[str(current_cluster_number)]:
+        feature_vectors.pop(i)
+
+def cluter_on_bic(mfcc_s1, mfcc_s2):
+    mfcc_s = np.concatenate((mfcc_s1, mfcc_s2), axis=1)
+
+    m, n = mfcc_s.shape
+    m, n1 = mfcc_s1.shape
+    m, n2 = mfcc_s2.shape
+
+    sigma0 = np.cov(mfcc_s).diagonal()
+    eps = np.spacing(1)
+    realmin = np.finfo(np.double).tiny
+    det0 = max(np.prod(np.maximum(sigma0,eps)),realmin)
+
+
+    part1 = mfcc_s1
+    part2 = mfcc_s2
+
+    sigma1 = np.cov(part1).diagonal()
+    sigma2 = np.cov(part2).diagonal()
+
+    det1 = max(np.prod(np.maximum(sigma1, eps)), realmin)
+    det2 = max(np.prod(np.maximum(sigma2, eps)), realmin)
+
+    BIC = 0.5 * (n * np.log(det0) - n1 * np.log(det1) - n2 * np.log(det2)) - 0.5 * (m + 0.5 * m * (m + 1)) * np.log(n)
+    return BIC
+
+# Speech segmentation based on BIC
 def compute_bic(mfcc_v,delta):
     m, n = mfcc_v.shape
 
@@ -68,7 +114,7 @@ def speech_segmentation(mfccs):
 
     return np.array(store_cp)
 
-def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg = False,classify_seg = False):
+def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg = False,cluster_method = None):
     y, sr = librosa.load(file, sr=sr)
 
     mfccs = librosa.feature.mfcc(y, sr, n_mfcc=12, hop_length=frame_shift, n_fft=frame_size)
@@ -121,7 +167,7 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
             tempAudio = y[save_segpoint[i]:save_segpoint[i+1]]
             librosa.output.write_wav("save_audio/%s.wav"%i,tempAudio,sr)
 
-    if classify_seg:
+    if cluster_method == 'kmeans':
         classify_segpoint = output_segpoint.copy()
         # Add the start and the end of the audio file
         classify_segpoint.insert(0, 0)
@@ -160,4 +206,27 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
         print("The lables for",len(kmeans.labels_),"speech segmentation belongs to the clusters below:")
         for i in range(len(kmeans.labels_)):
             print(kmeans.labels_[i],"")
+    if cluster_method == "bic":
+        classify_segpoint = output_segpoint.copy()
+        # Add the start and the end of the audio file
+        classify_segpoint.insert(0, 0)
+        classify_segpoint.append(len(y))
+        feature_vectors = OrderedDict()
+        for i in range(len(classify_segpoint) - 1):
+            tempAudio = y[classify_segpoint[i]:classify_segpoint[i + 1]]
+            mfccs = librosa.feature.mfcc(tempAudio, sr, n_mfcc=12, hop_length=frame_shift, n_fft=frame_size)
+            mfccs = mfccs / mfccs.max()
+            feature_vectors[str(i)] = mfccs
+        seg_numbers = len(feature_vectors.keys())
+        cluster_list = {}
+        cluster_k = 0
+
+        while len(feature_vectors.keys())>0 :
+            cluster_greedy(feature_vectors, cluster_list)
+
+        print('There are total %d clusters'%(len(cluster_list)), 'and they are listed below: ')
+        for index, key in enumerate(cluster_list.keys()):
+            print('cluster %d'%(index), ": ", cluster_list[key])
+
+
     return (np.asarray(output_segpoint) / float(sr))
