@@ -9,7 +9,9 @@ from sklearn.cluster import KMeans
 from collections import OrderedDict
 
 
-
+# Use the feature of the first segment to be the baseline, and loop over all the other
+# segments to compute the BIC distance between each one and the baseline. Set a BIC
+# distance threshold, decide whether this segment is in the same cluster with the baseline
 def cluster_greedy(feature_vectors, cluster_list):
     current_cluster_number = len(cluster_list)
     for index, key in enumerate(feature_vectors.keys()):
@@ -26,9 +28,11 @@ def cluster_greedy(feature_vectors, cluster_list):
                 temp.append(key)
                 cluster_list[str(current_cluster_number)] = temp
 
+    # Delete the segment related features if they are already clustered.
     for i in cluster_list[str(current_cluster_number)]:
         feature_vectors.pop(i)
 
+# Compute BIC distance between two MFCC features
 def cluter_on_bic(mfcc_s1, mfcc_s2):
     mfcc_s = np.concatenate((mfcc_s1, mfcc_s2), axis=1)
 
@@ -167,6 +171,7 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
             tempAudio = y[save_segpoint[i]:save_segpoint[i+1]]
             librosa.output.write_wav("save_audio/%s.wav"%i,tempAudio,sr)
 
+    # If the chosen cluster method is kmeans, use kmeans to perform clustering
     if cluster_method == 'kmeans':
         classify_segpoint = output_segpoint.copy()
         # Add the start and the end of the audio file
@@ -206,6 +211,8 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
         print("The lables for",len(kmeans.labels_),"speech segmentation belongs to the clusters below:")
         for i in range(len(kmeans.labels_)):
             print(kmeans.labels_[i],"")
+
+    # If the chosen cluster method is bic, use bic distance to perform clustering
     if cluster_method == "bic":
         classify_segpoint = output_segpoint.copy()
         # Add the start and the end of the audio file
@@ -217,11 +224,11 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
             mfccs = librosa.feature.mfcc(tempAudio, sr, n_mfcc=12, hop_length=frame_shift, n_fft=frame_size)
             mfccs = mfccs / mfccs.max()
             feature_vectors[str(i)] = mfccs
-        seg_numbers = len(feature_vectors.keys())
-        cluster_list = {}
-        cluster_k = 0
 
-        while len(feature_vectors.keys())>0 :
+        # Define a empty cluster before perform clustering
+        cluster_list = {}
+        # Call the function cluster_greedy recursively
+        while len(feature_vectors.keys())> 0 :
             cluster_greedy(feature_vectors, cluster_list)
 
         print('There are total %d clusters'%(len(cluster_list)), 'and they are listed below: ')

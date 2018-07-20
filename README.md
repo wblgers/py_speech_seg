@@ -50,7 +50,15 @@ To install librosa, you can try the following command:
    1 
 
    From the audio files stored in folder "save_audio", we can check that the clustering result is right.
-   
+
+4. Change the interface in 3 to be the definition of the clustering method you choose. Now the supported methods are "Kmeans" and "BIC distance". Also, the clustering method based on "BIC distance" is inspired by the Reference article.
+
+   Meanwhile, I use a longer audio file to test the new clustering method, there are totally 7 segments in "duihua_sample.wav". The final clustering results is as below:
+```
+There are total 2 clusters and they are listed below: 
+cluster 0 :  ['1', '3', '5']
+cluster 1 :  ['0', '2', '4', '6']
+```
 ## My Blog for this project
 [Python实现基于BIC的语音对话分割(一)](https://blog.csdn.net/wblgers1234/article/details/75896605)
 
