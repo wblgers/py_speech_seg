@@ -1,5 +1,5 @@
 # py_speech_seg
-A toolkit to implement segmentation on speech based on BIC
+A toolkit to implement segmentation on speech based on BIC and nerual network, such as BiLSTM
 
 ## Dependency
 - Python>=3.5
