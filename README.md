@@ -67,6 +67,7 @@ cluster 1 :  ['0', '2', '4', '6']
     `python train_bilstm_model.py`
 
 2. Predict the segmentation points
+
     `python multi_detect_Nerual.py`
 
 ## My Blog for this project
@@ -76,4 +77,5 @@ cluster 1 :  ['0', '2', '4', '6']
 
 ## Reference
 *Speaker, Environment and Channel Change Detection and Clustering via the Bayesian Information Criterion*, by IBM T.J. Watson Research Center
+
 *Speaker Change Detection in Broadcast TV using Bidirectional Long Short-Term Memory Networks, by Ruiqing Yin, Herve Bredin, Claude Barras
