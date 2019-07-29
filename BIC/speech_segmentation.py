@@ -1,6 +1,6 @@
 import numpy as np
-import voice_activity_detect as vad
-import vq_lbg as vqlbg
+import BIC.voice_activity_detect as vad
+import BIC.vq_lbg as vqlbg
 import librosa
 import matplotlib.pyplot as plt
 import os
@@ -32,6 +32,7 @@ def cluster_greedy(feature_vectors, cluster_list):
     for i in cluster_list[str(current_cluster_number)]:
         feature_vectors.pop(i)
 
+
 # Compute BIC distance between two MFCC features
 def cluter_on_bic(mfcc_s1, mfcc_s2):
     mfcc_s = np.concatenate((mfcc_s1, mfcc_s2), axis=1)
@@ -57,6 +58,7 @@ def cluter_on_bic(mfcc_s1, mfcc_s2):
 
     BIC = 0.5 * (n * np.log(det0) - n1 * np.log(det1) - n2 * np.log(det2)) - 0.5 * (m + 0.5 * m * (m + 1)) * np.log(n)
     return BIC
+
 
 # Speech segmentation based on BIC
 def compute_bic(mfcc_v,delta):
@@ -118,7 +120,8 @@ def speech_segmentation(mfccs):
 
     return np.array(store_cp)
 
-def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg = False,cluster_method = None):
+
+def multi_segmentation(file, sr, frame_size, frame_shift, plot_seg=False, save_seg=False, cluster_method=None):
     y, sr = librosa.load(file, sr=sr)
 
     mfccs = librosa.feature.mfcc(y, sr, n_mfcc=12, hop_length=frame_shift, n_fft=frame_size)
@@ -165,7 +168,7 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
             os.makedirs("save_audio")
         save_segpoint = output_segpoint.copy()
         # Add the start and the end of the audio file
-        save_segpoint.insert(0,0)
+        save_segpoint.insert(0, 0)
         save_segpoint.append(len(y))
         for i in range(len(save_segpoint)-1):
             tempAudio = y[save_segpoint[i]:save_segpoint[i+1]]
@@ -235,5 +238,4 @@ def multi_segmentation(file,sr,frame_size,frame_shift,plot_seg = False,save_seg 
         for index, key in enumerate(cluster_list.keys()):
             print('cluster %d'%(index), ": ", cluster_list[key])
 
-
-    return (np.asarray(output_segpoint) / float(sr))
+    return np.asarray(output_segpoint) / float(sr)
