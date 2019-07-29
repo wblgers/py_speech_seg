@@ -46,7 +46,6 @@ def cluter_on_bic(mfcc_s1, mfcc_s2):
     realmin = np.finfo(np.double).tiny
     det0 = max(np.prod(np.maximum(sigma0,eps)),realmin)
 
-
     part1 = mfcc_s1
     part2 = mfcc_s2
 
@@ -61,17 +60,17 @@ def cluter_on_bic(mfcc_s1, mfcc_s2):
 
 
 # Speech segmentation based on BIC
-def compute_bic(mfcc_v,delta):
+def compute_bic(mfcc_v, delta):
     m, n = mfcc_v.shape
 
     sigma0 = np.cov(mfcc_v).diagonal()
     eps = np.spacing(1)
     realmin = np.finfo(np.double).tiny
-    det0 = max(np.prod(np.maximum(sigma0,eps)),realmin)
+    det0 = max(np.prod(np.maximum(sigma0, eps)), realmin)
 
     flat_start = 5
 
-    range_loop = range(flat_start,n,delta)
+    range_loop = range(flat_start, n, delta)
     x = np.zeros(len(range_loop))
     iter = 0
     for index in range_loop:
@@ -90,7 +89,7 @@ def compute_bic(mfcc_v,delta):
 
     maxBIC = x.max()
     maxIndex = x.argmax()
-    if maxBIC>0:
+    if maxBIC > 0:
         return range_loop[maxIndex]-1
     else:
         return -1
@@ -172,7 +171,7 @@ def multi_segmentation(file, sr, frame_size, frame_shift, plot_seg=False, save_s
         save_segpoint.append(len(y))
         for i in range(len(save_segpoint)-1):
             tempAudio = y[save_segpoint[i]:save_segpoint[i+1]]
-            librosa.output.write_wav("save_audio/%s.wav"%i,tempAudio,sr)
+            librosa.output.write_wav("save_audio/%s.wav" % i, tempAudio, sr)
 
     # If the chosen cluster method is kmeans, use kmeans to perform clustering
     if cluster_method == 'kmeans':
@@ -194,7 +193,7 @@ def multi_segmentation(file, sr, frame_size, frame_shift, plot_seg=False, save_s
             # vq_code = vqlbg.vqlbg(mfccs,k)
             # vq_features[i,:] = vq_code.reshape(1,vq_code.shape[0]*vq_code.shape[1])
 
-        K = range(1,len(classify_segpoint))
+        K = range(1, len(classify_segpoint))
         square_error = []
         for k in K:
             kmeans = KMeans(n_clusters=k, random_state=0).fit(vq_features)
@@ -205,15 +204,15 @@ def multi_segmentation(file, sr, frame_size, frame_shift, plot_seg=False, save_s
         plt.title('Please choose the best number of clusters under Elbow Criterion')
         plt.xlabel("Number of clusters")
         plt.ylabel("SSE For each step")
-        plt.ylim(0,square_error[0]*1.5)
+        plt.ylim(0, square_error[0]*1.5)
         plt.grid(True)
         plt.show()
 
         k_n = input("Please input the best K value: ")
         kmeans = KMeans(int(k_n), random_state=0).fit(vq_features)
-        print("The lables for",len(kmeans.labels_),"speech segmentation belongs to the clusters below:")
+        print("The lables for", len(kmeans.labels_), "speech segmentation belongs to the clusters below:")
         for i in range(len(kmeans.labels_)):
-            print(kmeans.labels_[i],"")
+            print(kmeans.labels_[i], "")
 
     # If the chosen cluster method is bic, use bic distance to perform clustering
     if cluster_method == "bic":
@@ -231,11 +230,11 @@ def multi_segmentation(file, sr, frame_size, frame_shift, plot_seg=False, save_s
         # Define a empty cluster before perform clustering
         cluster_list = {}
         # Call the function cluster_greedy recursively
-        while len(feature_vectors.keys())> 0 :
+        while len(feature_vectors.keys()) > 0:
             cluster_greedy(feature_vectors, cluster_list)
 
-        print('There are total %d clusters'%(len(cluster_list)), 'and they are listed below: ')
+        print('There are total %d clusters' % (len(cluster_list)), 'and they are listed below: ')
         for index, key in enumerate(cluster_list.keys()):
-            print('cluster %d'%(index), ": ", cluster_list[key])
+            print('cluster %d' % index, ": ", cluster_list[key])
 
     return np.asarray(output_segpoint) / float(sr)
