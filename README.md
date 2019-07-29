@@ -2,7 +2,9 @@
 A toolkit to implement segmentation on speech based on BIC and nerual network, such as BiLSTM
 
 ## Dependency
-- Python>=3.5
+- Python>=3.6
+- tensorflow=1.13.1
+- keras=2.2.4
 - Librosa
 - Numpy
 - Scipy
@@ -12,12 +14,12 @@ You can use the installation of Anaconda to satisfy the required packages except
 To install librosa, you can try the following command:
 
 `conda install -c conda-forge librosa`
-## Example Usage
+## Example Usage for BIC segmentation
 
 
 1. Run script multi_detect.py to test the segmentation on a simple wav file:
 
-    `python multi_detect.py`
+    `python multi_detect_BIC.py`
 
    And you can get a speech segmentation result as showm below:
 
@@ -59,6 +61,14 @@ There are total 2 clusters and they are listed below:
 cluster 0 :  ['1', '3', '5']
 cluster 1 :  ['0', '2', '4', '6']
 ```
+## Example Usage for nerual network segmentation(To be continued)
+1. Train the network
+
+    `python train_bilstm_model.py`
+
+2. Predict the segmentation points
+    `python multi_detect_Nerual.py`
+
 ## My Blog for this project
 [Python实现基于BIC的语音对话分割(一)](https://blog.csdn.net/wblgers1234/article/details/75896605)
 
@@ -66,3 +76,4 @@ cluster 1 :  ['0', '2', '4', '6']
 
 ## Reference
 *Speaker, Environment and Channel Change Detection and Clustering via the Bayesian Information Criterion*, by IBM T.J. Watson Research Center
+*Speaker Change Detection in Broadcast TV using Bidirectional Long Short-Term Memory Networks, by Ruiqing Yin, Herve Bredin, Claude Barras
